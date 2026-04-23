@@ -4,7 +4,9 @@ import enum
 
 class RoomStatus(str, enum.Enum):
     AVAILABLE = "AVAILABLE"
+    BOOKED = "BOOKED"
     OCCUPIED = "OCCUPIED"
+    CLEANING = "CLEANING"
 
 class Room(Base):
     __tablename__ = "rooms"
