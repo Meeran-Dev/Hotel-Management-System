@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, hotel, room, booking, manager, housekeeping
-from database import ensure_runtime_schema
 
 app = FastAPI()
 
@@ -22,8 +21,3 @@ app.include_router(room.router)
 app.include_router(booking.router)
 app.include_router(manager.router)
 app.include_router(housekeeping.router)
-
-
-@app.on_event("startup")
-def run_startup_migrations():
-    ensure_runtime_schema()

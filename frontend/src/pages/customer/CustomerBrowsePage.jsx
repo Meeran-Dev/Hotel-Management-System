@@ -1,3 +1,7 @@
+import { useEffect, useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { api } from '../../api/client.js'
+
 const featuredHotels = [
   {
     id: 'taj',
@@ -52,6 +56,40 @@ const testimonials = [
 ]
 
 export function CustomerBrowsePage() {
+  const [hotels, setHotels] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [search, setSearch] = useState({ name: '', city: '', state: '' })
+
+  useEffect(() => {
+    async function loadHotels() {
+      setLoading(true)
+      setError('')
+      try {
+        const list = await api.getHotels()
+        setHotels(list || [])
+      } catch (err) {
+        setError(err.message || 'Failed to load hotels')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadHotels()
+  }, [])
+
+  const filteredHotels = useMemo(() => {
+    return hotels.filter((hotel) => {
+      const nameMatch = !search.name || hotel.name.toLowerCase().includes(search.name.toLowerCase())
+      const cityMatch = !search.city || (hotel.city && hotel.city.toLowerCase().includes(search.city.toLowerCase()))
+      const stateMatch = !search.state || (hotel.state && hotel.state.toLowerCase().includes(search.state.toLowerCase()))
+      return nameMatch && cityMatch && stateMatch
+    })
+  }, [hotels, search])
+
+  function updateSearch(key, value) {
+    setSearch((prev) => ({ ...prev, [key]: value }))
+  }
+
   return (
     <div className="space-y-14">
       <section className="relative overflow-hidden rounded-3xl">
@@ -68,78 +106,70 @@ export function CustomerBrowsePage() {
             </p>
             <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">Find Your Perfect Stay</h1>
             <p className="mt-4 max-w-xl text-sm text-slate-100 sm:text-base">
-              Discover handpicked luxury hotels with trusted service, elegant rooms, and seamless support.
+              Discover luxury hotels with trusted service. No signup required for booking.
             </p>
           </div>
         </div>
       </section>
 
-      <section>
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="section-title">Featured Hotels</h2>
-            <p className="section-subtitle">Browse top properties and call directly to reserve your room.</p>
+      <section className="mx-auto max-w-4xl">
+        <div className="glass-card p-6">
+          <h2 className="mb-4 text-xl font-semibold text-slate-900">Search Hotels</h2>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <input
+              type="text"
+              placeholder="Hotel Name"
+              value={search.name}
+              onChange={(e) => updateSearch('name', e.target.value)}
+              className="input-field"
+            />
+            <input
+              type="text"
+              placeholder="City"
+              value={search.city}
+              onChange={(e) => updateSearch('city', e.target.value)}
+              className="input-field"
+            />
+            <input
+              type="text"
+              placeholder="State"
+              value={search.state}
+              onChange={(e) => updateSearch('state', e.target.value)}
+              className="input-field"
+            />
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {featuredHotels.map((hotel) => (
-            <article
-              key={hotel.id}
-              className="rounded-2xl border border-slate-200 bg-white shadow-lg transition duration-300 hover:scale-105 hover:shadow-xl"
-            >
-              <img src={hotel.image} alt={hotel.name} className="h-52 w-full rounded-t-2xl object-cover" />
-              <div className="space-y-3 p-5">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">{hotel.name}</h3>
-                  <p className="text-sm text-slate-600">{hotel.location}</p>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <p className="font-semibold text-blue-600">₹{hotel.price}/night</p>
-                  <p className="text-amber-500">{"★".repeat(4)}☆</p>
-                </div>
-                <p className="text-xs text-slate-500">
-                  {hotel.rating} rating · {hotel.reviews.toLocaleString()} reviews
-                </p>
-                <a href={`tel:${hotel.phone}`} className="btn-primary block w-full text-center">
-                  📞 Book Now - Call
-                </a>
-                <p className="text-center text-sm font-medium text-slate-700">{hotel.phone}</p>
-              </div>
-            </article>
-          ))}
-        </div>
       </section>
 
-      <section className="grid gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-lg md:grid-cols-3">
-        <div className="rounded-2xl bg-blue-50 p-4">
-          <p className="text-2xl">🏨</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900">Handpicked Hotels</h3>
-          <p className="mt-1 text-sm text-slate-600">Curated premium stays in top business and leisure cities.</p>
-        </div>
-        <div className="rounded-2xl bg-emerald-50 p-4">
-          <p className="text-2xl">🛎️</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900">Trusted Service</h3>
-          <p className="mt-1 text-sm text-slate-600">24x7 support with fast response from dedicated teams.</p>
-        </div>
-        <div className="rounded-2xl bg-amber-50 p-4">
-          <p className="text-2xl">💳</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-900">Flexible Booking</h3>
-          <p className="mt-1 text-sm text-slate-600">Call to confirm offers, room upgrades and custom requests.</p>
-        </div>
+      {loading && <p className="text-center text-slate-600">Loading hotels...</p>}
+      {error && <div className="mx-auto max-w-md rounded-xl bg-red-50 p-4 text-red-700">{error}</div>}
+
+      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredHotels.map((hotel) => (
+          <article
+            key={hotel.hotel_id}
+            className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=400&q=80"
+              alt={hotel.name}
+              className="h-48 w-full object-cover"
+            />
+            <div className="p-5">
+              <h3 className="text-lg font-semibold text-slate-900">{hotel.name}</h3>
+              <p className="text-sm text-slate-600">{hotel.city}, {hotel.state}</p>
+              <p className="text-sm text-slate-600">{hotel.num_rooms} rooms</p>
+              <Link to={`/book/${hotel.hotel_id}`} className="btn-primary mt-4 w-full inline-block text-center">
+                Book Now
+              </Link>
+            </div>
+          </article>
+        ))}
       </section>
 
-      <section>
-        <h2 className="section-title">What Guests Say</h2>
-        <div className="mt-6 grid gap-5 md:grid-cols-3">
-          {testimonials.map((item) => (
-            <article key={item.name} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-md">
-              <p className="text-amber-500">{item.rating}</p>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">"{item.text}"</p>
-              <p className="mt-4 text-sm font-semibold text-slate-900">{item.name}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      {!loading && filteredHotels.length === 0 && (
+        <div className="text-center text-slate-600">No hotels found matching your search.</div>
+      )}
 
       <footer className="rounded-3xl border border-slate-200 bg-white px-6 py-7 text-sm text-slate-600">
         <div className="flex flex-col justify-between gap-3 sm:flex-row">

@@ -68,9 +68,9 @@ export function ManagerRoomsPage() {
     try {
       const payload = {
         hotel_id: Number(hotelId),
-        room_number: Number(roomNumber),
+        room_num: roomNumber,
         type,
-        price: Number(price),
+        price_per_night: Number(price),
       }
       await api.createRoom({ token: auth.token, payload })
       setRoomNumber('')
@@ -148,14 +148,14 @@ export function ManagerRoomsPage() {
       await api.bookRoom({
         token: auth.token,
         payload: {
+          hotel_id: Number(hotelId),
           room_id: Number(bookingForm.roomId),
           check_in_date: bookingForm.checkInDate,
           check_out_date: bookingForm.checkOutDate,
-          customer_name: bookingForm.customerName.trim(),
-          customer_mobile: bookingForm.mobile.trim(),
-          customer_age: Number(bookingForm.age),
-          guest_count: Number(bookingForm.guestCount || 1),
-          payment_method: bookingForm.paymentMethod,
+          booked_by: bookingForm.customerName.trim(),
+          phone_num: bookingForm.mobile.trim(),
+          adult_guests: Number(bookingForm.age),
+          child_guests: 0,
           transaction_id: bookingForm.paymentMethod === 'UPI' ? bookingForm.transactionId.trim() : null,
         },
       })

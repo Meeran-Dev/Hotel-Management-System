@@ -1,40 +1,15 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { useAuth } from '../auth/auth.jsx'
 
-async function detectRole(token) {
-  try {
-    await api.myHotels({ token })
-    return 'MANAGER'
-  } catch (err) {
-    if (err?.status !== 403) return 'HOUSEKEEPING'
-  }
-
-  try {
-    await api.deleteHotel({ token, hotelId: -999999 })
-  } catch (err) {
-    if (err?.status === 404) return 'ADMIN'
-  }
-
-  return 'HOUSEKEEPING'
-}
-
 export function LoginPage() {
-  const { portal = 'admin' } = useParams()
   const auth = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState(auth.email || '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const normalizedPortal = ['admin', 'manager', 'housekeeping'].includes(portal) ? portal : 'admin'
-  const portalTitle = {
-    admin: 'Admin Portal',
-    manager: 'Manager Portal',
-    housekeeping: 'Housekeeping Portal',
-  }[normalizedPortal]
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -45,7 +20,7 @@ export function LoginPage() {
       auth.setToken(res.access_token || '')
       auth.setEmail(email)
 
-      const resolvedRole = await detectRole(res.access_token || '')
+      const resolvedRole = String(res.role || '').toUpperCase()
       auth.setRole(resolvedRole)
 
       if (resolvedRole === 'ADMIN') navigate('/admin/hotels')
@@ -64,30 +39,12 @@ export function LoginPage() {
       <div className="relative mx-auto max-w-md">
         <div className="glass-card animate-fade-up p-7">
           <div className="mb-6 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">{portalTitle}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">Staff Portal Login</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900">Welcome back</h1>
             <p className="mt-2 text-sm text-slate-600">
               Sign in to access your dashboard and manage hotel operations.
             </p>
           </div>
-          <div className="mb-5 grid grid-cols-3 gap-2 rounded-2xl bg-slate-100 p-1">
-            <Link className={`portal-chip ${normalizedPortal === 'admin' ? 'portal-chip-active' : ''}`} to="/login/admin">
-              Admin
-            </Link>
-            <Link
-              className={`portal-chip ${normalizedPortal === 'manager' ? 'portal-chip-active' : ''}`}
-              to="/login/manager"
-            >
-              Manager
-            </Link>
-            <Link
-              className={`portal-chip ${normalizedPortal === 'housekeeping' ? 'portal-chip-active' : ''}`}
-              to="/login/housekeeping"
-            >
-              Housekeeping
-            </Link>
-          </div>
-
           <form onSubmit={onSubmit} className="space-y-4 transition-all duration-300">
             <div>
               <label className="text-sm font-medium text-slate-700">Email</label>

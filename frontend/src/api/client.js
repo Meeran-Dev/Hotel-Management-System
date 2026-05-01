@@ -87,5 +87,8 @@ export const api = {
       token,
     }),
   myHotels: ({ token }) => request('/manager/my-hotels', { token }),
+  getHotelStaff: ({ token, hotelId }) => request(`/manager/staff/${hotelId}`, { token }),
+  createHotelStaff: ({ token, hotelId, payload }) =>
+    request(`/manager/staff/${hotelId}`, { method: 'POST', token, body: payload }),
 }
 

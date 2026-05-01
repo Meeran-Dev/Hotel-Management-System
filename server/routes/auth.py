@@ -32,4 +32,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    return {"access_token": create_token({"sub": user.email})}
+    return {
+        "access_token": create_token({"sub": user.email}),
+        "role": user.role.value,
+        "email": user.email,
+    }

@@ -10,7 +10,8 @@ export function AdminHotelsPage() {
   const [msg, setMsg] = useState('')
 
   const [name, setName] = useState('')
-  const [location, setLocation] = useState('')
+  const [city, setCity] = useState('')
+  const [state, setState] = useState('')
   const [numRooms, setNumRooms] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -37,10 +38,11 @@ export function AdminHotelsPage() {
     setMsg('')
     setSaving(true)
     try {
-      const payload = { name, location, num_rooms: Number(numRooms) }
+      const payload = { name, city, state, num_rooms: Number(numRooms) }
       await api.createHotel({ token: auth.token, payload })
       setName('')
-      setLocation('')
+      setCity('')
+      setState('')
       setNumRooms('')
       setMsg('Hotel created')
       await refresh()
@@ -74,11 +76,20 @@ export function AdminHotelsPage() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600">Location</label>
+            <label className="text-xs font-medium text-slate-600">City</label>
             <input
               className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">State</label>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
               required
             />
           </div>
@@ -121,7 +132,8 @@ export function AdminHotelsPage() {
 function HotelRow({ hotel, token, onChanged }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(String(hotel.name ?? ''))
-  const [location, setLocation] = useState(String(hotel.location ?? ''))
+  const [city, setCity] = useState(String(hotel.city ?? ''))
+  const [state, setState] = useState(String(hotel.state ?? ''))
   const [numRooms, setNumRooms] = useState(String(hotel.num_rooms ?? ''))
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
@@ -130,7 +142,7 @@ function HotelRow({ hotel, token, onChanged }) {
     setMsg('')
     setLoading(true)
     try {
-      const payload = { name, location, num_rooms: Number(numRooms) }
+      const payload = { name, city, state, num_rooms: Number(numRooms) }
       await api.updateHotel({ token, hotelId: hotel.hotel_id, payload })
       setEditing(false)
       setMsg('Saved')
@@ -166,7 +178,7 @@ function HotelRow({ hotel, token, onChanged }) {
               (hotel_id <span className="font-mono">{hotel.hotel_id}</span>)
             </span>
           </div>
-          <div className="mt-1 text-sm text-slate-600">{hotel.location}</div>
+          <div className="mt-1 text-sm text-slate-600">{hotel.city}, {hotel.state}</div>
           <div className="mt-2 text-xs text-slate-500">
             num_rooms: <span className="font-mono">{hotel.num_rooms}</span>
           </div>
@@ -199,11 +211,19 @@ function HotelRow({ hotel, token, onChanged }) {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600">Location</label>
+            <label className="text-xs font-medium text-slate-600">City</label>
             <input
               className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-slate-600">State</label>
+            <input
+              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
             />
           </div>
           <div>

@@ -62,12 +62,12 @@ export function HousekeepingDashboardPage() {
             className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg transition duration-300 hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">Room #{task.room_number}</h3>
+              <h3 className="text-lg font-semibold text-slate-900">Room #{task.room_num}</h3>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusColor(task.status)}`}>{task.status}</span>
             </div>
             <p className="mt-2 text-sm text-slate-600">Type: {task.room_type}</p>
             <p className="text-sm text-slate-600">Room ID: {task.room_id}</p>
-            <p className="text-sm text-slate-600">Booking ID: {task.booking_id}</p>
+            <p className="text-sm text-slate-600">Notes: {task.notes || 'None'}</p>
             <button
               className="btn-primary mt-4 w-full"
               onClick={() => markAsCleaned(task.task_id)}

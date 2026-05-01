@@ -44,10 +44,11 @@ export function AppShell({ children }) {
             {auth.token && auth.role === 'ADMIN' ? (
               <>
                 <TopNavLink to="/admin/hotels">Hotels</TopNavLink>
+                <TopNavLink to="/admin/create-manager">Create manager</TopNavLink>
                 <TopNavLink to="/admin/assign">Assign manager</TopNavLink>
               </>
             ) : null}
-            {auth.token && auth.role === 'HOUSEKEEPING' ? (
+            {auth.token && auth.role === 'STAFF' ? (
               <TopNavLink to="/housekeeping/dashboard">Housekeeping</TopNavLink>
             ) : null}
           </nav>
@@ -70,11 +71,8 @@ export function AppShell({ children }) {
               </>
             ) : (
               <>
-                <Link className="btn-secondary" to="/login/admin">
-                  Admin Login
-                </Link>
-                <Link className="btn-primary" to="/login/manager">
-                  Staff Login
+                <Link className="btn-primary" to="/login">
+                  Login
                 </Link>
               </>
             )}
