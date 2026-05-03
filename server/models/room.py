@@ -11,6 +11,7 @@ class RoomStatus(str, enum.Enum):
     AVAILABLE = "AVAILABLE"
     BOOKED = "BOOKED"
     OCCUPIED = "OCCUPIED"
+    CLEANING_NEEDED = "CLEANING_NEEDED"
 
 class Room(Base):
     __tablename__ = "rooms"

@@ -40,8 +40,8 @@ export function CustomerBookingsPage() {
       {loading ? <div className="mt-6 text-sm text-slate-600">Loading…</div> : null}
       {error ? <div className="mt-6 rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{error}</div> : null}
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-white/70 bg-white/80 shadow-xl shadow-slate-900/5">
-        <div className="grid grid-cols-5 gap-2 border-b bg-gradient-to-r from-indigo-50 to-violet-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600">
+      <div className="glass-table-wrap mt-6">
+        <div className="grid grid-cols-5 gap-2 border-b border-white/50 bg-gradient-to-r from-blue-500/15 to-sky-500/15 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600 backdrop-blur-sm">
           <div>Booking</div>
           <div>Room</div>
           <div>Check-in</div>

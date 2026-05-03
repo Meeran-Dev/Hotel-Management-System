@@ -205,7 +205,7 @@ export function ManagerRoomsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
+      <div className="glass-card p-6 sm:p-8">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Rooms · Hotel #{hotelId}</h1>
@@ -220,7 +220,7 @@ export function ManagerRoomsPage() {
         </div>
       </div>
 
-      <form onSubmit={addRoom} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg">
+      <form onSubmit={addRoom} className="glass-card p-6">
         <div className="text-sm font-semibold text-slate-900">Add New Room</div>
         <div className="mt-4 grid gap-3 sm:grid-cols-4">
           <div>
@@ -257,11 +257,11 @@ export function ManagerRoomsPage() {
           <RoomEditor key={r.room_id} room={r} hotelId={hotelId} token={auth.token} onChanged={refresh} />
         ))}
         {!loading && !error && rooms.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">No rooms found.</div>
+          <div className="glass-card p-6 text-sm text-slate-600">No rooms found.</div>
         ) : null}
       </div>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg">
+      <section className="glass-card p-6">
         <h2 className="text-xl font-semibold text-slate-900">Booking Lifecycle</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-sm">
@@ -310,7 +310,7 @@ export function ManagerRoomsPage() {
 
       {bookingOpen ? (
         <div className="fixed inset-0 z-40 grid place-items-center bg-slate-900/40 p-4">
-          <form onSubmit={submitBooking} className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+          <form onSubmit={submitBooking} className="glass-card w-full max-w-2xl p-6 sm:p-8">
             <h3 className="text-xl font-semibold text-slate-900">Book Room</h3>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div>
@@ -408,7 +408,7 @@ export function ManagerRoomsPage() {
                   required
                 />
               ) : (
-                <div className="rounded-xl border border-slate-200 p-3 text-sm text-slate-600">Cash payment on confirmation</div>
+                <div className="glass-inset p-3 text-sm text-slate-600">Cash payment on confirmation</div>
               )}
             </div>
             {bookingForm.paymentMethod === 'UPI' ? (
@@ -446,6 +446,7 @@ export function ManagerRoomsPage() {
 function statusClass(status) {
   const normalized = String(status || '').toUpperCase()
   if (normalized.includes('AVAILABLE')) return 'bg-emerald-100 text-emerald-700'
+  if (normalized.includes('CLEANING_NEEDED')) return 'bg-amber-100 text-amber-800'
   if (normalized.includes('CLEAN')) return 'bg-amber-100 text-amber-700'
   return 'bg-rose-100 text-rose-700'
 }
@@ -494,7 +495,7 @@ function RoomEditor({ room, hotelId, token, onChanged }) {
   }
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg transition duration-300 hover:shadow-xl">
+    <article className="glass-card p-5 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(37,99,235,0.12)] sm:p-6">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-slate-900">

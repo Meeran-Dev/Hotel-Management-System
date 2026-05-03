@@ -29,6 +29,15 @@ def create_hotel(data: HotelCreate, user=Depends(get_current_user), db: Session 
 def get_hotels(db: Session = Depends(get_db)):
     return db.query(Hotel).all()
 
+
+@router.get("/{hotel_id}")
+def get_hotel(hotel_id: int, db: Session = Depends(get_db)):
+    hotel = db.query(Hotel).filter(Hotel.hotel_id == hotel_id).first()
+    if not hotel:
+        raise HTTPException(status_code=404, detail="Hotel not found")
+    return hotel
+
+
 @router.put("/{hotel_id}")
 def update_hotel(hotel_id: int, data: HotelCreate, user=Depends(get_current_user), db: Session = Depends(get_db)):
     if user.role != RoleEnum.ADMIN:

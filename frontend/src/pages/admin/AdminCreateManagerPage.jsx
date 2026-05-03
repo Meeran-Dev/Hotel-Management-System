@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import { api } from '../../api/client.js'
-import { useAuth } from '../../auth/auth.jsx'
 
 export function AdminCreateManagerPage() {
-  const auth = useAuth()
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
@@ -19,7 +17,7 @@ export function AdminCreateManagerPage() {
     setError('')
     setSaving(true)
     try {
-      const res = await api.signup({ ...form, role: 'MANAGER' })
+      await api.signup({ ...form, role: 'MANAGER' })
       setMsg('Manager account created successfully')
       setForm({ name: '', email: '', password: '' })
     } catch (err) {
@@ -30,10 +28,10 @@ export function AdminCreateManagerPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="mx-auto max-w-md space-y-6">
       <div className="glass-card p-6 sm:p-8">
-        <h1 className="section-title">Create Manager Account</h1>
-        <p className="section-subtitle">Add a new manager to the system.</p>
+        <h1 className="section-title text-2xl">Create manager</h1>
+        <p className="section-subtitle">Invite a portfolio manager — they&apos;ll appear in Assign manager.</p>
 
         <form onSubmit={create} className="mt-6 space-y-4">
           <div>
@@ -42,7 +40,7 @@ export function AdminCreateManagerPage() {
               type="text"
               value={form.name}
               onChange={(e) => updateForm('name', e.target.value)}
-              className="input-field"
+              className="input-lux"
               required
             />
           </div>
@@ -52,7 +50,7 @@ export function AdminCreateManagerPage() {
               type="email"
               value={form.email}
               onChange={(e) => updateForm('email', e.target.value)}
-              className="input-field"
+              className="input-lux"
               required
             />
           </div>
@@ -62,7 +60,7 @@ export function AdminCreateManagerPage() {
               type="password"
               value={form.password}
               onChange={(e) => updateForm('password', e.target.value)}
-              className="input-field"
+              className="input-lux"
               required
             />
           </div>

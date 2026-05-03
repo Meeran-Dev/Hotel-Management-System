@@ -35,9 +35,9 @@ export function ManagerHotelsPage() {
         const hotelId = assignment.hotel_id
 
         const [hotelData, roomsData, staffData] = await Promise.all([
-          api.getHotels().then(hotels => hotels.find(h => h.hotel_id === hotelId)),
+          api.getHotel({ hotelId }),
           api.getRooms({ hotelId }),
-          api.getHotelStaff({ token: auth.token, hotelId })
+          api.getHotelStaff({ token: auth.token, hotelId }),
         ])
 
         if (!cancelled) {
@@ -62,13 +62,14 @@ export function ManagerHotelsPage() {
   const occupiedRooms = rooms.filter((r) => String(r.status).toUpperCase() === 'OCCUPIED').length
   const availableRooms = rooms.filter((r) => String(r.status).toUpperCase() === 'AVAILABLE').length
   const bookedRooms = rooms.filter((r) => String(r.status).toUpperCase() === 'BOOKED').length
-  const needCleaning = rooms.filter((r) => String(r.status).toUpperCase() === 'BOOKED').length
+  const needCleaning = rooms.filter((r) => String(r.status).toUpperCase() === 'CLEANING_NEEDED').length
 
   function roomColor(status) {
     const normalized = String(status || '').toUpperCase()
     if (normalized.includes('AVAILABLE')) return 'bg-emerald-100 border-emerald-300 text-emerald-800'
     if (normalized.includes('OCCUPIED')) return 'bg-rose-100 border-rose-300 text-rose-800'
     if (normalized.includes('BOOKED')) return 'bg-blue-100 border-blue-300 text-blue-800'
+    if (normalized.includes('CLEANING_NEEDED')) return 'bg-amber-100 border-amber-300 text-amber-900'
     return 'bg-gray-100 border-gray-300 text-gray-800'
   }
 
@@ -130,27 +131,30 @@ export function ManagerHotelsPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[240px,1fr]">
-      <aside className="rounded-2xl bg-blue-900 p-5 text-blue-50 shadow-xl">
-        <h2 className="text-lg font-semibold">Manager Panel</h2>
-        <p className="mt-2 text-sm text-blue-100">Manage your hotel efficiently.</p>
+      <aside className="glass-panel-strong h-fit p-5 sm:p-6">
+        <h2 className="text-lg font-semibold tracking-tight">Manager panel</h2>
+        <p className="mt-2 text-sm text-blue-100/95">Operate rooms and staff from the hotel you&apos;ve been assigned.</p>
         <div className="mt-6 space-y-2 text-sm">
           <button
-            className={`w-full rounded-xl px-3 py-2 text-left ${currentTab === 'rooms' ? 'bg-blue-800/70' : 'bg-blue-800/40'}`}
+            type="button"
+            className={`w-full rounded-xl px-3 py-2.5 text-left shadow-sm transition ${currentTab === 'rooms' ? 'bg-white/20 ring-2 ring-white/25' : 'bg-black/15 hover:bg-black/25'}`}
             onClick={() => setCurrentTab('rooms')}
           >
-            🛏️ Manage Rooms
+            Manage rooms
           </button>
           <button
-            className="w-full rounded-xl bg-blue-800/40 px-3 py-2 text-left"
+            type="button"
+            className="w-full rounded-xl bg-black/15 px-3 py-2.5 text-left transition hover:bg-black/25"
             onClick={goToBooking}
           >
-            📅 Open Booking System
+            Open booking
           </button>
           <button
-            className={`w-full rounded-xl px-3 py-2 text-left ${currentTab === 'staff' ? 'bg-blue-800/70' : 'bg-blue-800/40'}`}
+            type="button"
+            className={`w-full rounded-xl px-3 py-2.5 text-left transition ${currentTab === 'staff' ? 'bg-white/20 ring-2 ring-white/25' : 'bg-black/15 hover:bg-black/25'}`}
             onClick={() => setCurrentTab('staff')}
           >
-            👥 Staff
+            Staff
           </button>
         </div>
       </aside>
@@ -158,35 +162,37 @@ export function ManagerHotelsPage() {
       <section>
         {currentTab === 'rooms' && (
           <div className="space-y-6">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Manage Rooms - {hotel?.name}</h1>
+            <div className="glass-card p-6 sm:p-8">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                Manage rooms — {hotel?.name}
+              </h1>
               <p className="mt-2 text-sm text-slate-600">Monitor and manage room inventory.</p>
               <div className="mt-5 grid gap-4 sm:grid-cols-5">
-                <div className="rounded-2xl bg-blue-50 p-4">
+                <div className="glass-inset p-4">
                   <p className="text-xs text-slate-500">Total Rooms</p>
                   <p className="mt-1 text-3xl font-semibold text-blue-600">{totalRooms}</p>
                 </div>
-                <div className="rounded-2xl bg-emerald-50 p-4">
+                <div className="glass-inset p-4">
                   <p className="text-xs text-slate-500">Available</p>
-                  <p className="mt-1 text-3xl font-semibold text-emerald-600">{availableRooms}</p>
+                  <p className="mt-1 text-3xl font-semibold text-emerald-700">{availableRooms}</p>
                 </div>
-                <div className="rounded-2xl bg-rose-50 p-4">
+                <div className="glass-inset p-4">
                   <p className="text-xs text-slate-500">Occupied</p>
                   <p className="mt-1 text-3xl font-semibold text-rose-600">{occupiedRooms}</p>
                 </div>
-                <div className="rounded-2xl bg-blue-50 p-4">
+                <div className="glass-inset p-4">
                   <p className="text-xs text-slate-500">Booked</p>
                   <p className="mt-1 text-3xl font-semibold text-blue-600">{bookedRooms}</p>
                 </div>
-                <div className="rounded-2xl bg-amber-50 p-4">
+                <div className="glass-inset p-4">
                   <p className="text-xs text-slate-500">Need Cleaning</p>
                   <p className="mt-1 text-3xl font-semibold text-amber-600">{needCleaning}</p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-              <h2 className="text-xl font-semibold text-slate-900">Room Grid</h2>
+            <div className="glass-card p-6 sm:p-8">
+              <h2 className="text-xl font-semibold text-slate-900">Room grid</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {rooms.map((room) => (
                   <div key={room.room_id} className={`rounded-xl border p-4 ${roomColor(room.status)}`}>
@@ -196,7 +202,7 @@ export function ManagerHotelsPage() {
                   </div>
                 ))}
               </div>
-              <form onSubmit={addRoom} className="mt-6 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-4">
+              <form onSubmit={addRoom} className="glass-inset mt-6 grid gap-3 p-4 sm:grid-cols-4">
                 <input
                   className="input-lux"
                   placeholder="Room number"
@@ -233,12 +239,14 @@ export function ManagerHotelsPage() {
         )}
 
         {currentTab === 'staff' && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Staff - {hotel?.name}</h1>
+          <div className="glass-card p-6 sm:p-8">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+              Staff — {hotel?.name}
+            </h1>
             <p className="mt-2 text-sm text-slate-600">Manage hotel staff.</p>
             <div className="mt-5 space-y-4">
               {staff.map((s) => (
-                <div key={s.user_id} className="rounded-xl border border-slate-200 p-4">
+                <div key={s.user_id} className="glass-inset p-4">
                   <div className="flex justify-between">
                     <div>
                       <h3 className="font-semibold">{s.name}</h3>
@@ -253,7 +261,7 @@ export function ManagerHotelsPage() {
               <button className="btn-primary" onClick={() => setStaffFormOpen(true)}>Add New Staff</button>
             </div>
             {staffFormOpen && (
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="glass-inset mt-4 p-4">
                 <h3 className="font-semibold text-slate-900">Add New Staff</h3>
                 <form onSubmit={addStaff} className="mt-3 grid gap-3 sm:grid-cols-4">
                   <input

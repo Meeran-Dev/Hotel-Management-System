@@ -34,8 +34,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-blue-700 via-blue-600 to-emerald-500 p-4 sm:p-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.25),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.2),transparent_40%)]" />
+    <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 p-4 shadow-[0_20px_60px_rgba(37,99,235,0.25)] sm:p-8">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.35),transparent_38%),radial-gradient(circle_at_80%_80%,rgba(255,255,255,0.22),transparent_42%)]" />
       <div className="relative mx-auto max-w-md">
         <div className="glass-card animate-fade-up p-7">
           <div className="mb-6 text-center">

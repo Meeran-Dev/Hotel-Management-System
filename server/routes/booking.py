@@ -31,6 +31,9 @@ def book_room(data: BookingCreate, db: Session = Depends(get_db)):
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
+    if room.status == RoomStatus.CLEANING_NEEDED:
+        raise HTTPException(status_code=400, detail="Room is not ready (cleaning in progress)")
+
     existing = db.query(Booking).filter(
         Booking.room_id == data.room_id,
         Booking.status.in_([BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]),
@@ -112,20 +115,23 @@ def available_rooms(hotel_id: int, check_in_date: date, check_out_date: date, db
         raise HTTPException(status_code=400, detail="Invalid date range")
 
     room_list = db.query(Room).filter(Room.hotel_id == hotel_id).all()
-    result = []
+    if not room_list:
+        return []
 
-    for room in room_list:
-        overlapping = db.query(Booking).filter(
-            Booking.room_id == room.room_id,
-            Booking.status.in_([BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]),
-            Booking.check_in_date <= check_out_date,
-            Booking.check_out_date >= check_in_date
-        ).first()
+    room_ids = [r.room_id for r in room_list]
+    busy_rows = db.query(Booking.room_id).filter(
+        Booking.room_id.in_(room_ids),
+        Booking.status.in_([BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]),
+        Booking.check_in_date <= check_out_date,
+        Booking.check_out_date >= check_in_date,
+    ).distinct()
+    busy_room_ids = {row[0] for row in busy_rows.all()}
 
-        if not overlapping:
-            result.append(room)
-
-    return result
+    return [
+        room
+        for room in room_list
+        if room.room_id not in busy_room_ids and room.status != RoomStatus.CLEANING_NEEDED
+    ]
 
 
 @router.post("/check-in")
@@ -188,7 +194,7 @@ def check_out_booking(data: BookingCheckOut, user=Depends(get_current_user), db:
 
     booking.status = BookingStatus.COMPLETED
     booking.check_out_time = datetime.utcnow()
-    room.status = RoomStatus.BOOKED
+    room.status = RoomStatus.CLEANING_NEEDED
 
     task = CleaningTask(
         hotel_id=room.hotel_id,

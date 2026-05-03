@@ -56,6 +56,7 @@ export const api = {
   },
 
   getHotels: () => request('/hotels/'),
+  getHotel: ({ hotelId }) => request(`/hotels/${hotelId}`),
   createHotel: ({ token, payload }) => request('/hotels/', { method: 'POST', token, body: payload }),
   updateHotel: ({ token, hotelId, payload }) =>
     request(`/hotels/${hotelId}`, { method: 'PUT', token, body: payload }),
@@ -86,6 +87,7 @@ export const api = {
       method: 'POST',
       token,
     }),
+  listManagers: ({ token }) => request('/manager/managers', { token }),
   myHotels: ({ token }) => request('/manager/my-hotels', { token }),
   getHotelStaff: ({ token, hotelId }) => request(`/manager/staff/${hotelId}`, { token }),
   createHotelStaff: ({ token, hotelId, payload }) =>

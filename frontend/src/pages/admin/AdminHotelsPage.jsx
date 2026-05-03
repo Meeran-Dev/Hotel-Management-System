@@ -44,7 +44,7 @@ export function AdminHotelsPage() {
       setCity('')
       setState('')
       setNumRooms('')
-      setMsg('Hotel created')
+      setMsg('Hotel added to the directory.')
       await refresh()
     } catch (err) {
       setMsg(err.message || 'Create failed')
@@ -54,22 +54,19 @@ export function AdminHotelsPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Hotels dashboard</h1>
-      <p className="mt-1 text-sm text-slate-600">
-        Admin endpoints:{' '}
-        <code className="rounded bg-slate-100 px-1">POST /hotels/</code>,{' '}
-        <code className="rounded bg-slate-100 px-1">PUT /hotels/{'{hotel_id}'}</code>,{' '}
-        <code className="rounded bg-slate-100 px-1">DELETE /hotels/{'{hotel_id}'}</code>
-      </p>
+    <div className="space-y-8">
+      <div className="glass-card p-6 sm:p-8">
+        <h1 className="section-title text-2xl sm:text-3xl">Hotels</h1>
+        <p className="section-subtitle">Create properties and maintain their profile from one place.</p>
+      </div>
 
-      <form onSubmit={create} className="mt-6 rounded-lg border bg-white p-5">
+      <form onSubmit={create} className="glass-card p-6 sm:p-8">
         <div className="text-sm font-semibold text-slate-900">Add hotel</div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label className="text-xs font-medium text-slate-600">Name</label>
             <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              className="input-lux"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -78,7 +75,7 @@ export function AdminHotelsPage() {
           <div>
             <label className="text-xs font-medium text-slate-600">City</label>
             <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              className="input-lux"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               required
@@ -87,42 +84,45 @@ export function AdminHotelsPage() {
           <div>
             <label className="text-xs font-medium text-slate-600">State</label>
             <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              className="input-lux"
               value={state}
               onChange={(e) => setState(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600">num_rooms</label>
+            <label className="text-xs font-medium text-slate-600">Room capacity</label>
             <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              className="input-lux"
+              type="number"
+              min={1}
               value={numRooms}
               onChange={(e) => setNumRooms(e.target.value)}
               required
             />
           </div>
-          <div className="flex items-end">
-            <button
-              disabled={saving}
-              className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
-            >
+          <div className="flex items-end lg:col-span-1">
+            <button disabled={saving} className="btn-primary w-full" type="submit">
               {saving ? 'Adding…' : 'Add'}
             </button>
           </div>
         </div>
-        {msg ? <div className="mt-3 text-sm text-slate-600">{msg}</div> : null}
+        {msg ? <div className="mt-4 text-sm text-slate-600">{msg}</div> : null}
       </form>
 
-      {loading ? <div className="mt-6 text-sm text-slate-600">Loading…</div> : null}
-      {error ? <div className="mt-6 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+      {loading ? <div className="text-sm text-slate-600">Loading hotels…</div> : null}
+      {error ? (
+        <div className="rounded-xl border border-red-200/80 bg-red-50/90 p-4 text-sm text-red-700 backdrop-blur-sm">
+          {error}
+        </div>
+      ) : null}
 
-      <div className="mt-6 divide-y overflow-hidden rounded-lg border bg-white">
+      <div className="glass-card divide-y divide-white/40">
         {hotels.map((h) => (
           <HotelRow key={h.hotel_id} hotel={h} token={auth.token} onChanged={refresh} />
         ))}
         {!loading && !error && hotels.length === 0 ? (
-          <div className="px-4 py-6 text-sm text-slate-600">No hotels found.</div>
+          <div className="px-5 py-8 text-sm text-slate-600">No hotels in the catalog yet.</div>
         ) : null}
       </div>
     </div>
@@ -145,7 +145,7 @@ function HotelRow({ hotel, token, onChanged }) {
       const payload = { name, city, state, num_rooms: Number(numRooms) }
       await api.updateHotel({ token, hotelId: hotel.hotel_id, payload })
       setEditing(false)
-      setMsg('Saved')
+      setMsg('Saved.')
       onChanged()
     } catch (err) {
       setMsg(err.message || 'Save failed')
@@ -155,7 +155,7 @@ function HotelRow({ hotel, token, onChanged }) {
   }
 
   async function remove() {
-    if (!confirm(`Delete hotel_id ${hotel.hotel_id}?`)) return
+    if (!confirm(`Delete “${hotel.name}”? This cannot be undone.`)) return
     setMsg('')
     setLoading(true)
     try {
@@ -169,29 +169,26 @@ function HotelRow({ hotel, token, onChanged }) {
   }
 
   return (
-    <div className="p-4">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+    <div className="p-5 sm:p-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div>
-          <div className="text-sm font-semibold text-slate-900">
-            {hotel.name}{' '}
-            <span className="text-slate-500">
-              (hotel_id <span className="font-mono">{hotel.hotel_id}</span>)
-            </span>
+          <div className="text-base font-semibold text-slate-900">{hotel.name}</div>
+          <div className="mt-1 text-sm text-slate-600">
+            {hotel.city}, {hotel.state}
           </div>
-          <div className="mt-1 text-sm text-slate-600">{hotel.city}, {hotel.state}</div>
-          <div className="mt-2 text-xs text-slate-500">
-            num_rooms: <span className="font-mono">{hotel.num_rooms}</span>
-          </div>
+          <div className="mt-2 text-xs text-slate-500">Room capacity: {hotel.num_rooms}</div>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
-            className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-slate-50"
+            type="button"
+            className="btn-secondary text-sm"
             onClick={() => setEditing((v) => !v)}
           >
             {editing ? 'Cancel' : 'Edit'}
           </button>
           <button
-            className="rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+            type="button"
+            className="rounded-xl border border-red-200 bg-white/50 px-3 py-2 text-sm font-medium text-red-700 backdrop-blur-sm hover:bg-red-50"
             disabled={loading}
             onClick={remove}
           >
@@ -201,45 +198,35 @@ function HotelRow({ hotel, token, onChanged }) {
       </div>
 
       {editing ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-4">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label className="text-xs font-medium text-slate-600">Name</label>
-            <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <input className="input-lux" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
             <label className="text-xs font-medium text-slate-600">City</label>
-            <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
+            <input className="input-lux" value={city} onChange={(e) => setCity(e.target.value)} />
           </div>
           <div>
             <label className="text-xs font-medium text-slate-600">State</label>
-            <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
-              value={state}
-              onChange={(e) => setState(e.target.value)}
-            />
+            <input className="input-lux" value={state} onChange={(e) => setState(e.target.value)} />
           </div>
           <div>
-            <label className="text-xs font-medium text-slate-600">num_rooms</label>
+            <label className="text-xs font-medium text-slate-600">Room capacity</label>
             <input
-              className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+              className="input-lux"
+              type="number"
+              min={1}
               value={numRooms}
               onChange={(e) => setNumRooms(e.target.value)}
             />
           </div>
           <div className="flex items-end">
             <button
-              className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+              type="button"
+              className="btn-primary w-full"
               disabled={loading}
               onClick={save}
-              type="button"
             >
               {loading ? 'Saving…' : 'Save'}
             </button>
@@ -251,4 +238,3 @@ function HotelRow({ hotel, token, onChanged }) {
     </div>
   )
 }
-

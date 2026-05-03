@@ -16,11 +16,36 @@ def get_db():
     finally:
         db.close()
 
+@router.get("/managers")
+def list_managers(user=Depends(get_current_user), db: Session = Depends(get_db)):
+    if user.role != RoleEnum.ADMIN:
+        raise HTTPException(status_code=403, detail="Admins only")
+
+    unassigned_managers = (
+        db.query(User)
+        .filter(
+            User.role == RoleEnum.MANAGER,
+            ~db.query(HotelAssignment)
+            .filter(HotelAssignment.user_id == User.user_id)
+            .exists(),
+        )
+        .order_by(User.name.asc())
+        .all()
+    )
+    return [
+        {"user_id": m.user_id, "name": m.name, "email": m.email} for m in unassigned_managers
+    ]
+
+
 @router.post("/assign")
 def assign_manager(manager_id: int, hotel_id: int, user=Depends(get_current_user), db: Session = Depends(get_db)):
     # Only admin can assign
     if user.role != RoleEnum.ADMIN:
         raise HTTPException(status_code=403, detail="Admins only")
+
+    manager_row = db.query(User).filter(User.user_id == manager_id).first()
+    if not manager_row or manager_row.role != RoleEnum.MANAGER:
+        raise HTTPException(status_code=404, detail="Manager not found")
 
     existing = db.query(HotelAssignment).filter(
         HotelAssignment.user_id == manager_id,

@@ -20,8 +20,8 @@ export function BookingPage() {
     room_id: '',
     booked_by: '',
     phone_num: '',
-    adult_guests: 1,
-    child_guests: 0,
+    adult_guests: '',
+    child_guests: '',
     transaction_id: '',
   })
 
@@ -40,35 +40,39 @@ export function BookingPage() {
   const estimatedAmount = Number(selectedRoom?.price_per_night || 0) * nights
 
   useEffect(() => {
+    let cancelled = false
     async function loadData() {
       setLoading(true)
       setError('')
       try {
-        const hotelData = await api.getHotels().then((items) => items.find((item) => item.hotel_id === Number(hotelId)))
+        const hasDates = Boolean(form.check_in_date && form.check_out_date)
+        const [hotelData, available, bookingsList] = await Promise.all([
+          api.getHotel({ hotelId }),
+          hasDates
+            ? api.getAvailableRooms({
+                hotelId,
+                checkInDate: form.check_in_date,
+                checkOutDate: form.check_out_date,
+              })
+            : Promise.resolve([]),
+          isManager && auth.token
+            ? api.hotelBookings({ token: auth.token, hotelId })
+            : Promise.resolve([]),
+        ])
+        if (cancelled) return
         setHotel(hotelData || null)
-
-        if (form.check_in_date && form.check_out_date) {
-          const available = await api.getAvailableRooms({
-            hotelId,
-            checkInDate: form.check_in_date,
-            checkOutDate: form.check_out_date,
-          })
-          setAvailableRooms(available || [])
-        } else {
-          setAvailableRooms([])
-        }
-
-        if (isManager && auth.token) {
-          const list = await api.hotelBookings({ token: auth.token, hotelId })
-          setBookings(list || [])
-        }
+        setAvailableRooms(hasDates ? available || [] : [])
+        if (isManager && auth.token) setBookings(bookingsList || [])
       } catch (err) {
-        setError(err.message || 'Failed to load booking data')
+        if (!cancelled) setError(err.message || 'Failed to load booking data')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
     loadData()
+    return () => {
+      cancelled = true
+    }
   }, [hotelId, form.check_in_date, form.check_out_date, isManager, auth.token])
 
   function updateForm(key, value) {
@@ -100,8 +104,8 @@ export function BookingPage() {
         room_id: '',
         booked_by: '',
         phone_num: '',
-        adult_guests: 1,
-        child_guests: 0,
+        adult_guests: '',
+        child_guests: '',
         transaction_id: '',
       })
       setAvailableRooms([])
@@ -134,7 +138,16 @@ export function BookingPage() {
     }
   }
 
-  if (loading) return <div className="py-10 text-center">Loading...</div>
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl py-16 text-center">
+        <div className="glass-card inline-flex min-w-[200px] items-center justify-center gap-3 px-8 py-6 text-sm text-slate-600">
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+          Loading…
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -154,7 +167,7 @@ export function BookingPage() {
               type="date"
               value={form.check_in_date}
               onChange={(e) => updateForm('check_in_date', e.target.value)}
-              className="input-field"
+              className="input-lux"
               min={new Date().toISOString().split('T')[0]}
               required
             />
@@ -165,7 +178,7 @@ export function BookingPage() {
               type="date"
               value={form.check_out_date}
               onChange={(e) => updateForm('check_out_date', e.target.value)}
-              className="input-field"
+              className="input-lux"
               min={form.check_in_date || new Date().toISOString().split('T')[0]}
               required
             />
@@ -175,7 +188,7 @@ export function BookingPage() {
         <div>
           <label className="block text-sm font-medium text-slate-700">Available Room</label>
           <select
-            className="input-field"
+            className="input-lux"
             value={form.room_id}
             onChange={(e) => updateForm('room_id', e.target.value)}
             required
@@ -195,7 +208,7 @@ export function BookingPage() {
             placeholder="Booked By"
             value={form.booked_by}
             onChange={(e) => updateForm('booked_by', e.target.value)}
-            className="input-field"
+            className="input-lux"
             required
           />
           <input
@@ -203,7 +216,7 @@ export function BookingPage() {
             placeholder="Phone Number"
             value={form.phone_num}
             onChange={(e) => updateForm('phone_num', e.target.value)}
-            className="input-field"
+            className="input-lux"
             required
           />
           <input
@@ -211,7 +224,7 @@ export function BookingPage() {
             placeholder="Adult Guests"
             value={form.adult_guests}
             onChange={(e) => updateForm('adult_guests', e.target.value)}
-            className="input-field"
+            className="input-lux"
             min="1"
             required
           />
@@ -220,7 +233,7 @@ export function BookingPage() {
             placeholder="Child Guests"
             value={form.child_guests}
             onChange={(e) => updateForm('child_guests', e.target.value)}
-            className="input-field"
+            className="input-lux"
             min="0"
           />
         </div>
@@ -230,7 +243,7 @@ export function BookingPage() {
           placeholder="Transaction ID (optional)"
           value={form.transaction_id}
           onChange={(e) => updateForm('transaction_id', e.target.value)}
-          className="input-field"
+          className="input-lux"
         />
 
         <div className="text-sm text-slate-600">
@@ -250,7 +263,7 @@ export function BookingPage() {
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-slate-500">
+                <tr className="border-b border-white/60 text-left text-slate-500">
                   <th className="px-2 py-2">Room</th>
                   <th className="px-2 py-2">Guest</th>
                   <th className="px-2 py-2">Dates</th>

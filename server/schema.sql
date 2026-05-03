@@ -29,7 +29,7 @@ CREATE TABLE rooms (
     room_num VARCHAR(50) NOT NULL,
     type ENUM('STANDARD', 'DELUXE', 'SUITE') NOT NULL,
     price_per_night DECIMAL(10,2) NOT NULL,
-    status ENUM('BOOKED', 'OCCUPIED', 'AVAILABLE') DEFAULT 'AVAILABLE',
+    status ENUM('BOOKED', 'OCCUPIED', 'AVAILABLE', 'CLEANING_NEEDED') DEFAULT 'AVAILABLE',
 
     FOREIGN KEY (hotel_id) REFERENCES hotels(hotel_id) ON DELETE CASCADE,
     UNIQUE (hotel_id, room_num) -- prevents duplicate room numbers per hotel
